@@ -22,10 +22,10 @@ volatile uint32_t ticks_delay = 0;
 uint8_t gDATABUF[DATA_BUF_SIZE];
 
 wiz_NetInfo gWIZNETINFO = { .mac = {0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef},
-                            .ip = {192, 168, 0, 89},
+                            .ip = {192, 168, 88, 200},
                             .sn = {255, 255, 255, 0},
-                            .gw = {192, 168, 0, 254},
-                            .dns = {192, 168, 0, 160},
+                            .gw = {192, 168, 88, 254},
+                            .dns = {8, 8, 8, 8},
                             .dhcp = NETINFO_STATIC };
 
 uint8_t testIP[4];
@@ -126,8 +126,10 @@ int main()
             {
                 uint16_t Len = getSn_RX_RSR(HTTP_SOCKET);
                 recv(0, ReceiveData, 128);
+                send(0, ReceiveData, strlen((const char *)ReceiveData));
                 sendBuf((uint8_t*)ReceiveData, Len);
             }
+        
         delay(100);
     }
     
