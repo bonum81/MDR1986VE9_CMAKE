@@ -1,0 +1,24 @@
+  
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "openocd",
+			"request": "launch",
+			"type": "cortex-debug",
+			"cwd": "${workspaceRoot}",
+			"servertype": "openocd",
+			"executable": "./build/MDR32.elf",
+			"svdFile": "./IDE/SVD/MDR1986BE92.svd",
+			"configFiles": [
+				"${workspaceRoot}\\OpenOCD_data\\open_ocd_flash.cfg"
+			],
+			"showDevDebugOutput": true,
+			"searchDir": [
+				"C:\\Software\\OpenOCD-20210729-0.11.0\\share\\openocd\\scripts"
+			],
+			"runToMain": true
+		}
+
+	]
+}

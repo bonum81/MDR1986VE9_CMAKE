@@ -1,0 +1,26 @@
+{
+    "configurations": [
+        {
+            "name": "arm_c_cpp_properties",
+            "compilerPath": "C:/Software/EmbeddedGCC/bin/arm-none-eabi-g++.exe",
+            "includePath": [
+                "${workspaceFolder}\\**",
+                "${workspaceFolder}\\lib\\emdr\\CMSIS\\CM3\\CoreSupport**",
+                "${workspaceFolder}\\lib\\emdr\\CMSIS\\CM3\\DeviceSupport\\MDR32F9Qx\\inc**",
+                "${workspaceFolder}\\lib\\w5500\\include\\**"
+            ], 
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "USE_MDR32F9Q2_Rev1",
+                "USE_MDR1986VE9x",
+                "USE_JTAG_A"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}

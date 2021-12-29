@@ -1,0 +1,6 @@
+r
+loadbin build\milandr_vscode_test.bin, 0x00
+verifybin build\milandr_vscode_test.bin, 0x00
+r
+g
+q
