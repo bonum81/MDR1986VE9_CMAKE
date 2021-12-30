@@ -1,4 +1,4 @@
-#include "init.hpp"
+#include "init.h"
 
 
 void init_leds(){
@@ -73,7 +73,7 @@ void init_Timers(MDR_TIMER_TypeDef* periphealTimer)
     periphealTimer->CNTRL       = 0x0;
     periphealTimer->CNT         = 0x00000000;
     periphealTimer->PSG         = 375-1;         // 750kHz / 75 = 10kHz
-    periphealTimer->ARR         = 1000-1;      // 
+    periphealTimer->ARR         = 50-1;      // 
     periphealTimer->IE          = 0x00000002;
             //MDR_RST_CLK->TIM_CLOCK     |= 0x04000006;   // 48Mhz / 4 = 750kHz
     TIMER_ITConfig(MDR_TIMER3, TIMER_STATUS_CNT_ARR, ENABLE);
@@ -162,6 +162,45 @@ void init_GPIO_UART(void)
     RST_CLK_PCLKcmd(RST_CLK_PCLK_UART2, ENABLE);
 
 }
+
+
+
+void init_GPIO_CAN(void)
+{
+    PORT_InitTypeDef PORT_InitCAN;
+
+    RST_CLK_PCLKcmd(RST_CLK_PCLK_PORTA, ENABLE);
+	
+	PORT_DeInit(MDR_PORTA);
+	
+	/* Fill PortInit structure*/
+    PORT_InitCAN.PORT_PULL_UP = PORT_PULL_UP_OFF;
+    PORT_InitCAN.PORT_PULL_DOWN = PORT_PULL_DOWN_OFF;
+    PORT_InitCAN.PORT_PD_SHM = PORT_PD_SHM_OFF;
+    PORT_InitCAN.PORT_PD = PORT_PD_DRIVER;
+    PORT_InitCAN.PORT_GFEN = PORT_GFEN_OFF;
+    PORT_InitCAN.PORT_FUNC = PORT_FUNC_ALTER;
+    PORT_InitCAN.PORT_SPEED = PORT_SPEED_MAXFAST;
+    PORT_InitCAN.PORT_MODE = PORT_MODE_DIGITAL;
+	
+    /* Configure PORTA pins 7 (CAN2_RX) as input */
+    PORT_InitCAN.PORT_OE = PORT_OE_IN;
+    PORT_InitCAN.PORT_Pin = PORT_Pin_7;
+    PORT_Init(MDR_PORTA, &PORT_InitCAN);
+	
+    /* Configure PORTA pins 6 (CAN2_TX) as output */
+    PORT_InitCAN.PORT_OE = PORT_OE_OUT;
+    PORT_InitCAN.PORT_Pin = PORT_Pin_6;
+    PORT_Init(MDR_PORTA, &PORT_InitCAN);
+	
+	
+	//MDR_RST_CLK->PER_CLOCK |= (1UL << 0);
+	RST_CLK_PCLKcmd(RST_CLK_PCLK_CAN1, ENABLE);    // Clock to periph CAN
+		
+	CAN_BRGInit(MDR_CAN1, CAN_HCLKdiv1);		    // Diviner to periph CAN=0, HCLK = 48MHz
+
+}
+
 
 void SetUARTSettings(UARTSettings settings)
 {
@@ -268,14 +307,6 @@ void sendBuf(uint8_t* buf, uint8_t size)
 
 
 
-extern "C"
-{
-    void Timer3_IRQHandler(void)
-    {
-        MDR_TIMER3->STATUS &= ~0x002; //IE FLAG = 0
-        write_LED(LED_RSRX, ENABLE);
-    }
-
 
     void UART2_IRQHandler(void)
     {
@@ -295,5 +326,3 @@ extern "C"
         }
     }
 
-
-}

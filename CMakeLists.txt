@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.15.3)
 
-project(MDR32 VERSION 0.0.1 LANGUAGES CXX C ASM)
+project(MDR32 VERSION 0.0.1 LANGUAGES C ASM)
 
 enable_language(C ASM)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -33,7 +33,7 @@ add_compile_options(
 	#-Wsign-conversion
 	-ffunction-sections
 	-fdata-sections
-	$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+	#$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
 )
 
 
@@ -42,7 +42,7 @@ add_link_options(
 	-lc
 	-lm
 	-lnosys
-	-lstdc++
+	#-lstdc++
 	--specs=nano.specs
 	--specs=nosys.specs
 	-Wl,--gc-sections
@@ -62,8 +62,10 @@ include_directories(
 
 #Add main src files
 set(SRC
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/app.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/init.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/app.c
+	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/init.c
+	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/can.c
+	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/ft_protocol.c
 	)
 
 

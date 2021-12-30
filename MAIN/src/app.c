@@ -1,7 +1,9 @@
-#include "app.hpp"
-#include "init.hpp"
+#include "app.h"
+#include "init.h"
+#include "can.h"
 #include <stdio.h>
 #include <string.h>
+#include "ft_protocol.h"
 
 #if defined(__cplusplus)
 extern "C"{
@@ -21,12 +23,20 @@ volatile uint32_t ticks_delay = 0;
 
 uint8_t gDATABUF[DATA_BUF_SIZE];
 
+// wiz_NetInfo gWIZNETINFO = { .mac = {0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef},
+//                             .ip = {192, 168, 88, 200},
+//                             .sn = {255, 255, 255, 0},
+//                             .gw = {192, 168, 88, 254},
+//                             .dns = {8, 8, 8, 8},
+//                             .dhcp = NETINFO_STATIC };
+
 wiz_NetInfo gWIZNETINFO = { .mac = {0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef},
-                            .ip = {192, 168, 88, 200},
+                            .ip = {192, 168, 0, 89},
                             .sn = {255, 255, 255, 0},
-                            .gw = {192, 168, 88, 254},
+                            .gw = {192, 168, 0, 254},
                             .dns = {8, 8, 8, 8},
                             .dhcp = NETINFO_STATIC };
+
 
 uint8_t testIP[4];
 
@@ -55,19 +65,29 @@ UARTSettings RS232_Set;
 char DebugBuf[64];
 
 
+
+
 int main()
 {
     
     init_clk();
     init_leds();
     init_GPIO_UART();
+    init_GPIO_CAN();
     init_SPI();
+    
     SysTickTimerInit();
-    //init_Timers(MDR_TIMER3);
+    init_Timers(MDR_TIMER3);
     write_LED(LED_CANTX, DISABLE);
     write_LED(LED_CANRX, DISABLE);
     write_LED(LED_RSTX, DISABLE);
     write_LED(LED_RSRX, DISABLE);
+
+    GeneralSettingsCAN.ID = 0x01;
+    GeneralSettingsCAN.baudRate = 0x41E0;
+
+    canSettingsHandler();
+
 
     RS232_Set.BaudRate = 0xFD00;
     RS232_Set.EnParity = 0;
@@ -89,7 +109,7 @@ int main()
   
     wizchip_init(rx_tx_buff_sizes, rx_tx_buff_sizes);
 	
-    wizchip_setnetinfo(&gWIZNETINFO);
+    //wizchip_setnetinfo(&gWIZNETINFO);
 	
 	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO);
 
@@ -101,36 +121,33 @@ int main()
     {   
         //Working_W5500();
 
-        if (getSn_SR(HTTP_SOCKET) == SOCK_LISTEN)
-        {
-            sprintf(DebugBuf, "listen...\r\n");
-            sendBuf((uint8_t*)DebugBuf, 13);
-        }
-        if (getSn_SR(HTTP_SOCKET) == SOCK_ESTABLISHED)
-        {
-            //sprintf(DebugBuf, "Establiched.\r\n");
-            //sendBuf((uint8_t*)DebugBuf, 13);
-
+        // if (getSn_SR(HTTP_SOCKET) == SOCK_LISTEN)
+        // {
+        //     sprintf(DebugBuf, "listen...\r\n");
+        //     sendBuf((uint8_t*)DebugBuf, 13);
+        // }
+        // if (getSn_SR(HTTP_SOCKET) == SOCK_ESTABLISHED)
+        // {
+        //     //sprintf(DebugBuf, "Establiched.\r\n");
+        //     //sendBuf((uint8_t*)DebugBuf, 13);
             
-            
-            
-        }
-        if (getSn_SR(HTTP_SOCKET) == SOCK_CLOSE_WAIT)
-        {
-            close(HTTP_SOCKET);
-            sprintf(DebugBuf, "Closed.\r\n");
-            sendBuf((uint8_t*)DebugBuf, 13);
-            TCP_Connection();
-        }
-        if (getSn_RX_RSR(HTTP_SOCKET) != 0x0000)
-            {
-                uint16_t Len = getSn_RX_RSR(HTTP_SOCKET);
-                recv(0, ReceiveData, 128);
-                send(0, ReceiveData, strlen((const char *)ReceiveData));
-                sendBuf((uint8_t*)ReceiveData, Len);
-            }
+        // }
+        // if (getSn_SR(HTTP_SOCKET) == SOCK_CLOSE_WAIT)
+        // {
+        //     close(HTTP_SOCKET);
+        //     sprintf(DebugBuf, "Closed.\r\n");
+        //     sendBuf((uint8_t*)DebugBuf, 13);
+        //     TCP_Connection();
+        // }
+        // if (getSn_RX_RSR(HTTP_SOCKET) != 0x0000)
+        //     {
+        //         uint16_t Len = getSn_RX_RSR(HTTP_SOCKET);
+        //         recv(0, ReceiveData, 128);
+        //         send(0, ReceiveData, strlen((const char *)ReceiveData));
+        //         sendBuf((uint8_t*)ReceiveData, Len);
+        //     }
         
-        delay(100);
+        // delay(100);
     }
     
 }
@@ -150,7 +167,6 @@ void TCP_Connection()
             sendBuf((uint8_t*)DebugBuf, 32);
     }
 
-
     stat = listen(HTTP_SOCKET);
     if(stat != SOCK_OK)
     {
@@ -165,6 +181,37 @@ void TCP_Connection()
     
 }
 
+uint32_t ControlConnect(uint8_t socketNum)
+{
+    
+    switch (getSn_SR(socketNum))
+    {
+    case SOCK_ESTABLISHED:
+
+        return 0;
+        
+        break;
+
+    case SOCK_CLOSE_WAIT:
+        close(socketNum);
+        return 0;
+
+        break;
+
+    case SOCK_CLOSED:
+        TCP_Connection();
+        break;
+
+
+
+    default:
+        break;
+    }
+
+
+
+    return 0;
+}
 
 void Working_W5500()
 {
@@ -322,6 +369,25 @@ void SysTick_Handler(void)
     write_LED(LED_CANTX, DISABLE);
     write_LED(LED_CANRX, DISABLE);
 }
+
+void Timer3_IRQHandler(void)
+{
+    MDR_TIMER3->STATUS &= ~0x002; //IE FLAG = 0
+    
+    ControlConnect(0);
+
+    if (getSn_RX_RSR(HTTP_SOCKET) != 0x0000)
+        {
+            uint16_t Len = getSn_RX_RSR(HTTP_SOCKET);
+            recv(0, ReceiveData, 128);
+            //send(0, ReceiveData, strlen((const char *)ReceiveData));
+            FT_receive_handler(ReceiveData, Len);
+            sendBuf((uint8_t*)ReceiveData, Len);
+        }
+
+
+}
+
 
 #if defined(__cplusplus)
 }

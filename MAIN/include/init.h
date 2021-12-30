@@ -22,9 +22,9 @@
 #define SPI1_MISO PORT_Pin_3
 #define SPI1_RST_W5500 PORT_Pin_1
 
-#ifdef __cplusplus
-extern "C"{
-#endif
+// #ifdef __cplusplus
+// extern "C"{
+// #endif
 
 //Include C libs//
 
@@ -35,20 +35,23 @@ extern "C"{
 #include "MDR32F9Qx_timer.h"
 #include "MDR32F9Qx_ssp.h"
 #include "MDR32F9Qx_uart.h"
+#include "MDR32F9Qx_can.h"
+#include <stdbool.h>
 
-#ifdef __cplusplus
-}
-#endif
+// #ifdef __cplusplus
+// }
+// #endif
 
 
 typedef struct
 {
-    uint16_t BaudRate = 0xFD00;
-    bool StopBits = 0;
-    bool EnParity = 0;
-    bool BitParity = 0;
+    uint16_t BaudRate; //= 0xFD00;
+    bool StopBits; //= 0;
+    bool EnParity; //= 0;
+    bool BitParity; //= 0;
 }UARTSettings;
 
+void init_GPIO_CAN(void);
 void init_GPIO_UART(void);
 void SetUARTSettings(UARTSettings settings);
 void sendByte(uint16_t Data);

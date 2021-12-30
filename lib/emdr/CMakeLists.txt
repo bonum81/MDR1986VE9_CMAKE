@@ -5,7 +5,7 @@ add_library(stddrv STATIC
 	#MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_dac.c
 	#MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_eeprom.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_port.c
-	#MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_power.c
+	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_can.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_rst_clk.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_ssp.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_timer.c
