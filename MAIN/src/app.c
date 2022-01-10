@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "ft_protocol.h"
-
+#include "paramsys.h"
+//#include "FreeRTOS.h"
+//#include "task.h"
 #if defined(__cplusplus)
 extern "C"{
 #endif  
@@ -21,7 +23,8 @@ extern "C"{
 
 volatile uint32_t ticks_delay = 0;
 
-uint8_t gDATABUF[DATA_BUF_SIZE];
+
+//static uint8_t TestMassive [1024] __attribute__((section(".deviceParameters"))) = {1,2,3,4}; //__attribute__((section(".deviceParameters"))) __attribute__((used)) 
 
 // wiz_NetInfo gWIZNETINFO = { .mac = {0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef},
 //                             .ip = {192, 168, 88, 200},
@@ -65,57 +68,57 @@ UARTSettings RS232_Set;
 char DebugBuf[64];
 
 
-
-
 int main()
 {
-    
     init_clk();
     init_leds();
-    init_GPIO_UART();
-    init_GPIO_CAN();
-    init_SPI();
-    
-    SysTickTimerInit();
-    init_Timers(MDR_TIMER3);
     write_LED(LED_CANTX, DISABLE);
     write_LED(LED_CANRX, DISABLE);
     write_LED(LED_RSTX, DISABLE);
     write_LED(LED_RSRX, DISABLE);
-
-    GeneralSettingsCAN.ID = 0x01;
-    GeneralSettingsCAN.baudRate = 0x41E0;
-
-    canSettingsHandler();
-
-
-    RS232_Set.BaudRate = 0xFD00;
-    RS232_Set.EnParity = 0;
-    RS232_Set.BitParity = 0;
-    RS232_Set.StopBits = 1;
-
-    SetUARTSettings(RS232_Set);
-
-    PORT_ResetBits(MDR_PORTE, SPI1_RST_W5500);
-    delay(1);
-    PORT_SetBits(MDR_PORTE, SPI1_RST_W5500);
-    delay(1000);
+    //xTaskCreate( vBlink_0_Task, "Blink_0", 50, ( void * ) 1, tskIDLE_PRIORITY+1, ( void * ) 1);
+    //vTaskStartScheduler();
+    // init_GPIO_UART();
+    // init_GPIO_CAN();
+    // init_SPI();
     
-    reg_wizchip_cs_cbfunc(W5500_Select, W5500_Unselect);
-    reg_wizchip_spi_cbfunc(W5500_ReadByte, W5500_WriteByte);
-    reg_wizchip_spiburst_cbfunc(W5500_ReadBuff, W5500_WriteBuff);
+    // SysTickTimerInit();
+    // init_Timers(MDR_TIMER3);
 
-    uint8_t rx_tx_buff_sizes[] = {2, 2, 2, 2, 2, 2, 2, 2};
+
+    // GeneralSettingsCAN.ID = 0x01;
+    // GeneralSettingsCAN.baudRate = 0x41E0;
+
+    // canSettingsHandler();
+
+
+    // RS232_Set.BaudRate = 0xFD00;
+    // RS232_Set.EnParity = 0;
+    // RS232_Set.BitParity = 0;
+    // RS232_Set.StopBits = 1;
+
+    // SetUARTSettings(RS232_Set);
+
+    // PORT_ResetBits(MDR_PORTE, SPI1_RST_W5500);
+    // delay(1);
+    // PORT_SetBits(MDR_PORTE, SPI1_RST_W5500);
+    // delay(1000);
+    
+    // reg_wizchip_cs_cbfunc(W5500_Select, W5500_Unselect);
+    // reg_wizchip_spi_cbfunc(W5500_ReadByte, W5500_WriteByte);
+    // reg_wizchip_spiburst_cbfunc(W5500_ReadBuff, W5500_WriteBuff);
+
+    // uint8_t rx_tx_buff_sizes[] = {2, 2, 2, 2, 2, 2, 2, 2};
   
-    wizchip_init(rx_tx_buff_sizes, rx_tx_buff_sizes);
+    // wizchip_init(rx_tx_buff_sizes, rx_tx_buff_sizes);
 	
-    //wizchip_setnetinfo(&gWIZNETINFO);
+    // //wizchip_setnetinfo(&gWIZNETINFO);
 	
-	ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO);
+	// ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO);
 
-    delay(1000);
+    // delay(1000);
 
-    TCP_Connection();
+    // TCP_Connection();
 
     while (1)
     {   
@@ -361,14 +364,14 @@ void W5500_WriteByte(uint8_t byte)
 extern "C"{
 #endif  
 
-void SysTick_Handler(void)
-{
-	ticks_delay++;
-    write_LED(LED_RSTX, DISABLE);
-    write_LED(LED_RSRX, DISABLE);
-    write_LED(LED_CANTX, DISABLE);
-    write_LED(LED_CANRX, DISABLE);
-}
+// void SysTick_Handler(void)
+// {
+// 	ticks_delay++;
+//     write_LED(LED_RSTX, DISABLE);
+//     write_LED(LED_RSRX, DISABLE);
+//     write_LED(LED_CANTX, DISABLE);
+//     write_LED(LED_CANRX, DISABLE);
+// }
 
 void Timer3_IRQHandler(void)
 {

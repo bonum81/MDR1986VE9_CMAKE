@@ -1,7 +1,8 @@
 /* Linker script to configure memory regions */
 MEMORY
 {
-	FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 128K
+	FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 124K
+	FLASH_31 (rx) : ORIGIN = 0x0801F000, LENGTH = 4K
 	RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 32K
 }
 
@@ -39,6 +40,14 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
+	.deviceParameters :
+	{
+		. = ALIGN(4);
+		*(.deviceParameters)           /* .plc sections (code) */
+		*(.deviceParameters*)          /* .plc* sections (code) */
+		. = ALIGN(4);
+	} >FLASH_31
+	
 	.text :
 	{
 		KEEP(*(.isr_vector))

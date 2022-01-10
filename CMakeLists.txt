@@ -60,18 +60,35 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/include
 )
 
+
+
 #Add main src files
 set(SRC
 	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/app.c
 	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/init.c
 	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/can.c
 	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/ft_protocol.c
+	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/paramsys.c
 	)
 
+#Add freertos dir
+#set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS/)
+#file(GLOB_RECURSE FREERTOS_SOURCES 
+#	"${FREERTOS_DIR}/*.c"
+#	"${FREERTOS_DIR}/portable/GCC/ARM_CM3/port.c"
+#	"${FREERTOS_DIR}/portable/MemMang/heap_4.c"
+#)
 
+#include_directories(${FREERTOS_DIR}/include/)
+#include_directories(${FREERTOS_DIR}/portable/GCC/ARM_CM3)
+
+
+#add_executable(${PROJECT_NAME} ${SRC} ${FREERTOS_SOURCES})
 add_executable(${PROJECT_NAME} ${SRC})
 target_link_libraries(${PROJECT_NAME} stddrv)
 target_link_libraries(${PROJECT_NAME} w5500)
+#target_link_libraries(${PROJECT_NAME} freertos)
+
 #set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
 #set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD_REQUIRED ON)
 

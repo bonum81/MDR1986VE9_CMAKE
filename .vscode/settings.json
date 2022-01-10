@@ -15,7 +15,9 @@
       "mdr32f9qx_eeprom.h": "c",
       "system_mdr32f9qx.h": "c",
       "w5500.h": "c",
-      "wizchip_conf.h": "c"
+      "wizchip_conf.h": "c",
+      "init.h": "c",
+      "paramsys.h": "c"
     },
     "terminal.integrated.profiles.windows": {
         "PowerShell -NoProfile": {
