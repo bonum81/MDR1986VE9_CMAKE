@@ -18,7 +18,9 @@
       "wizchip_conf.h": "c",
       "init.h": "c",
       "paramsys.h": "c",
-      "mdr32f9qx_usb.h": "c"
+      "mdr32f9qx_usb.h": "c",
+      "can.h": "c",
+      "app.h": "c"
     },
     "terminal.integrated.profiles.windows": {
         "PowerShell -NoProfile": {
