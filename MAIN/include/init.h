@@ -5,11 +5,13 @@
 //     Defines for indicate leds K104
 /*-----------------------------------------*/
 
-#define LED_PORT  MDR_PORTE
-#define LED_CANTX PORT_Pin_3
-#define LED_CANRX PORT_Pin_6
-#define LED_RSTX  PORT_Pin_2
-#define LED_RSRX  PORT_Pin_7
+#define LED_PORT  MDR_PORTA
+#define LED_CAN1_TX PORT_Pin_0
+#define LED_CAN1_RX PORT_Pin_1
+#define LED_CAN2_TX PORT_Pin_2
+#define LED_CAN2_RX PORT_Pin_3
+#define LED_USB_TX  PORT_Pin_4
+#define LED_USB_RX  PORT_Pin_5
 
 
 /*-----------------------------------------*/

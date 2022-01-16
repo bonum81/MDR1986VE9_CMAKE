@@ -6,12 +6,12 @@ void init_leds(){
     PORT_InitTypeDef gpio_led_port;
 
     // Разрешить тактирование требуемых периферийных устройств
-    RST_CLK_PCLKcmd (RST_CLK_PCLK_PORTE, ENABLE);
+    RST_CLK_PCLKcmd (RST_CLK_PCLK_PORTA, ENABLE);
 
     //Выставить настройки структуры в дефолтное состояние
     PORT_StructInit (&gpio_led_port);
 
-    gpio_led_port.PORT_Pin   = LED_RSTX | LED_RSRX | LED_CANTX | LED_CANRX | SPI1_RST_W5500;
+    gpio_led_port.PORT_Pin   = LED_CAN1_RX | LED_CAN1_TX | LED_CAN2_RX | LED_CAN2_TX | LED_USB_TX | LED_USB_RX;
     //gpio_led_port.PORT_Pin   = LED_CANTX;
     gpio_led_port.PORT_MODE  = PORT_MODE_DIGITAL;
     gpio_led_port.PORT_FUNC  = PORT_FUNC_PORT;
@@ -33,7 +33,7 @@ void init_clk(void)
         }
     }
     /* CPU_C1_SEL = HSE */
-    RST_CLK_CPU_PLLconfig(RST_CLK_CPU_PLLsrcHSEdiv1, RST_CLK_CPU_PLLmul6);  // Предделитель 1, множитеть PLL=6. Системная частота 8МГц * 6 = 48МГц
+    RST_CLK_CPU_PLLconfig(RST_CLK_CPU_PLLsrcHSEdiv1, RST_CLK_CPU_PLLmul4);  // Предделитель 1, множитеть PLL=6. Системная частота 8МГц * 6 = 48МГц
     RST_CLK_CPU_PLLcmd(ENABLE);
     if (RST_CLK_CPU_PLLstatus() != SUCCESS)                                 // Ждем старт PLL
     {
@@ -83,55 +83,7 @@ void init_Timers(MDR_TIMER_TypeDef* periphealTimer)
 }
 
 
-void init_SPI(void)
-{
-    SSP_InitTypeDef sSSP;
-	PORT_InitTypeDef PORT_InitStructure;
 
-    RST_CLK_PCLKcmd(RST_CLK_PCLK_PORTF, ENABLE);
-    RST_CLK_PCLKcmd((RST_CLK_PCLK_RST_CLK | RST_CLK_PCLK_SSP1),ENABLE);
-
-    PORT_DeInit(SPI1_PORT);
-    PORT_StructInit(&PORT_InitStructure);
-
-    PORT_InitStructure.PORT_FUNC = PORT_FUNC_ALTER; 
-	PORT_InitStructure.PORT_MODE = PORT_MODE_DIGITAL;
-	PORT_InitStructure.PORT_SPEED = PORT_SPEED_MAXFAST;
-    PORT_InitStructure.PORT_OE = PORT_OE_OUT;
-	PORT_InitStructure.PORT_Pin = (SPI1_MOSI | SPI1_SCLK );
-	PORT_Init(SPI1_PORT, &PORT_InitStructure);
-	
-    PORT_InitStructure.PORT_OE = PORT_OE_IN;
-    PORT_InitStructure.PORT_Pin = (SPI1_MISO);
-	PORT_Init(SPI1_PORT, &PORT_InitStructure);
-
-    PORT_InitStructure.PORT_FUNC = PORT_FUNC_PORT;
-    PORT_InitStructure.PORT_MODE = PORT_MODE_DIGITAL;
-	PORT_InitStructure.PORT_SPEED = PORT_SPEED_MAXFAST;
-    PORT_InitStructure.PORT_OE = PORT_OE_OUT;
-    PORT_InitStructure.PORT_Pin = (SPI1_SCS);
-    PORT_Init(SPI1_PORT, &PORT_InitStructure);
-
-	// Reset all SSP settings
-	SSP_DeInit(MDR_SSP1);
-	SSP_BRGInit(MDR_SSP1, SSP_HCLKdiv1); //SSP_HCLKdiv4
-
-	// SSP2 MASTER configuration ------------------------------------------------
-	SSP_StructInit(&sSSP);
-	sSSP.SSP_SPH = SSP_SPH_1Edge;
-	sSSP.SSP_SPO = SSP_SPO_Low;
-	sSSP.SSP_SCR = 0;  //1
-	sSSP.SSP_CPSDVSR = 2; //12;//0x03;//0x05;  3  2  3
-	sSSP.SSP_Mode = SSP_ModeMaster;
-	sSSP.SSP_WordLength = SSP_WordLength8b;
-	sSSP.SSP_FRF = SSP_FRF_SPI_Motorola;
-	sSSP.SSP_HardwareFlowControl = SSP_HardwareFlowControl_SSE; //
-
-	SSP_Init(MDR_SSP1, &sSSP);
-	PORT_SetBits(SPI1_PORT, SPI1_SCS);
-
-	SSP_Cmd(MDR_SSP1, ENABLE);
-}
 
 void init_GPIO_UART(void)
 {
@@ -171,7 +123,7 @@ void init_GPIO_CAN(void)
 
     RST_CLK_PCLKcmd(RST_CLK_PCLK_PORTA, ENABLE);
 	
-	PORT_DeInit(MDR_PORTA);
+	//PORT_DeInit(MDR_PORTA);
 	
 	/* Fill PortInit structure*/
     PORT_InitCAN.PORT_PULL_UP = PORT_PULL_UP_OFF;
@@ -290,7 +242,7 @@ void sendByte(uint16_t Data)
 {
 	while (UART_GetFlagStatus (MDR_UART2, UART_FLAG_TXFE)!= SET){};
 	MDR_UART2->DR = (Data & (uint16_t)0x0FF);
-	write_LED(LED_RSTX, ENABLE);
+	
 }
 
 void sendBuf(uint8_t* buf, uint8_t size)
@@ -301,7 +253,7 @@ void sendBuf(uint8_t* buf, uint8_t size)
 	{
 		while (UART_GetFlagStatus (MDR_UART2, UART_FLAG_TXFE)!= SET){};
 		UART_SendData(MDR_UART2, buf[i]);
-		write_LED(LED_RSTX, ENABLE);
+		
 	}
 }
 
