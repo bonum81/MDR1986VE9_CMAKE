@@ -10,6 +10,9 @@ add_library(stddrv STATIC
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_ssp.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_timer.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_uart.c
+	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_usb.c
+	MDR32F9Qx_StdPeriph_Driver/src/USB_Library/MDR32F9Qx_usb_CDC.c
+	MDR32F9Qx_StdPeriph_Driver/src/USB_Library/MDR32F9Qx_usb_device.c
 )
 
 target_include_directories(stddrv PUBLIC
@@ -18,6 +21,7 @@ target_include_directories(stddrv PUBLIC
 	CMSIS/CM3/DeviceSupport/MDR32F9Qx/inc
 	CMSIS/CM3/DeviceSupport/MDR32F9Qx/startup
 	MDR32F9Qx_StdPeriph_Driver/inc
+	MDR32F9Qx_StdPeriph_Driver/inc/USB_Library
 )
 
 
