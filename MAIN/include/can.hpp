@@ -1,6 +1,16 @@
 #ifndef CAN_H
 #define CAN_H
 
+#ifdef __cplusplus
+extern "C"{
+#endif
+
+#include "MDR32Fx.h"
+
+#ifdef __cplusplus
+}
+#endif
+
 typedef struct 
 {
     uint8_t destinationAddress;

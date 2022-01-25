@@ -1,7 +1,9 @@
-#include "init.h"
+#include "init.hpp"
 
 
-void init_leds(){
+
+void init_leds(void)
+{
     // Структура для инициализации портов
     PORT_InitTypeDef gpio_led_port;
 
@@ -154,89 +156,89 @@ void init_GPIO_CAN(void)
 }
 
 
-void SetUARTSettings(UARTSettings settings)
-{
-	switch (settings.BaudRate)
-	{
-	    case 0xE800:
-			MDR_UART2->IBRD = 156;      // 1200
-			MDR_UART2->FBRD = 16;
-		    break;
-		case 0xF400:
-			MDR_UART2->IBRD = 78;		// 2400
-			MDR_UART2->FBRD = 8;
-			break;
-		case 0xFA00:
-			MDR_UART2->IBRD = 39;		// 4800
-			MDR_UART2->FBRD = 4;
-			break;
-		case 0xFD00:
-			MDR_UART2->IBRD = 19;		// 9600
-			MDR_UART2->FBRD = 34;
-			break;
-		case 0xFD80:
-			MDR_UART2->IBRD = 9;		// 19200
-			MDR_UART2->FBRD = 49;
-			break;
-		case 0xFF80:
-			MDR_UART2->IBRD = 3;		// 57600
-			MDR_UART2->FBRD = 16;
-			break;
-		case 0xFF84:
-			MDR_UART2->IBRD = 1;		// 115200
-			MDR_UART2->FBRD = 40;
-			break;
-		default:
-			MDR_UART2->IBRD = 19;		// 9600
-			MDR_UART2->FBRD = 34;
-			break;
-	}
-	if (settings.EnParity)
-	{
-		MDR_UART2->LCR_H |= (1 << 1);  				// Parity on.
-	}
-	else
-	{
-		MDR_UART2->LCR_H &=~ (1 << 1);  			// Parity off.
-	}
+// void SetUARTSettings(UARTSettings settings)
+// {
+// 	switch (settings.BaudRate)
+// 	{
+// 	    case 0xE800:
+// 			MDR_UART2->IBRD = 156;      // 1200
+// 			MDR_UART2->FBRD = 16;
+// 		    break;
+// 		case 0xF400:
+// 			MDR_UART2->IBRD = 78;		// 2400
+// 			MDR_UART2->FBRD = 8;
+// 			break;
+// 		case 0xFA00:
+// 			MDR_UART2->IBRD = 39;		// 4800
+// 			MDR_UART2->FBRD = 4;
+// 			break;
+// 		case 0xFD00:
+// 			MDR_UART2->IBRD = 19;		// 9600
+// 			MDR_UART2->FBRD = 34;
+// 			break;
+// 		case 0xFD80:
+// 			MDR_UART2->IBRD = 9;		// 19200
+// 			MDR_UART2->FBRD = 49;
+// 			break;
+// 		case 0xFF80:
+// 			MDR_UART2->IBRD = 3;		// 57600
+// 			MDR_UART2->FBRD = 16;
+// 			break;
+// 		case 0xFF84:
+// 			MDR_UART2->IBRD = 1;		// 115200
+// 			MDR_UART2->FBRD = 40;
+// 			break;
+// 		default:
+// 			MDR_UART2->IBRD = 19;		// 9600
+// 			MDR_UART2->FBRD = 34;
+// 			break;
+// 	}
+// 	if (settings.EnParity)
+// 	{
+// 		MDR_UART2->LCR_H |= (1 << 1);  				// Parity on.
+// 	}
+// 	else
+// 	{
+// 		MDR_UART2->LCR_H &=~ (1 << 1);  			// Parity off.
+// 	}
 
-	if (settings.BitParity)
-	{
-		MDR_UART2->LCR_H |= (1 << 2);  				// Дополнение до четного
-	}
-	else
-	{
-		MDR_UART2->LCR_H |= (1 << 2);  				// Дополнение до нечетного
-	}
+// 	if (settings.BitParity)
+// 	{
+// 		MDR_UART2->LCR_H |= (1 << 2);  				// Дополнение до четного
+// 	}
+// 	else
+// 	{
+// 		MDR_UART2->LCR_H |= (1 << 2);  				// Дополнение до нечетного
+// 	}
 
-	if (settings.StopBits)
-	{
-		MDR_UART2->LCR_H &=~ (1 << 3); 			// 1 stop bit
-	}
-	else
-	{
-		MDR_UART2->LCR_H |= (1 << 3); 			// 2 stop bit
-	}
+// 	if (settings.StopBits)
+// 	{
+// 		MDR_UART2->LCR_H &=~ (1 << 3); 			// 1 stop bit
+// 	}
+// 	else
+// 	{
+// 		MDR_UART2->LCR_H |= (1 << 3); 			// 2 stop bit
+// 	}
 
 
-	MDR_UART2->LCR_H |= (3 << 5);			// 8 Data bits		
-	UART_BRGInit(MDR_UART2, UART_HCLKdiv16);	
-	NVIC_EnableIRQ(UART2_IRQn);	
+// 	MDR_UART2->LCR_H |= (3 << 5);			// 8 Data bits		
+// 	UART_BRGInit(MDR_UART2, UART_HCLKdiv16);	
+// 	NVIC_EnableIRQ(UART2_IRQn);	
 
-	MDR_UART2->LCR_H |= (1 << 4);     //FIFO On
-	//MDR_UART2->LCR_H &=~ (1 << 4);     //FIFO Off
+// 	MDR_UART2->LCR_H |= (1 << 4);     //FIFO On
+// 	//MDR_UART2->LCR_H &=~ (1 << 4);     //FIFO Off
 		
-	MDR_UART2->CR = 0;
-	MDR_UART2->CR = ((1 << 8)|(1 << 9)|1); 
+// 	MDR_UART2->CR = 0;
+// 	MDR_UART2->CR = ((1 << 8)|(1 << 9)|1); 
 		
-	MDR_UART2-> IFLS = ((0 << 3) | (0 << 4) | (0 << 5));		//FIFO rx interrupt 1/8 FIFO, (2 byte)
-	MDR_UART2-> IMSC = ((1 << 6) | (1 << 4) | (1 << 10));
-    /* Enable Receiver interrupt */
-    UART_ITConfig (MDR_UART2, UART_IT_RX, ENABLE);
-	UART_ITConfig (MDR_UART2, UART_IT_RT, ENABLE);    // iterrupt timeout rx
-    /* Enables UART2 peripheral */
-    UART_Cmd(MDR_UART2,ENABLE);
-}
+// 	MDR_UART2-> IFLS = ((0 << 3) | (0 << 4) | (0 << 5));		//FIFO rx interrupt 1/8 FIFO, (2 byte)
+// 	MDR_UART2-> IMSC = ((1 << 6) | (1 << 4) | (1 << 10));
+//     /* Enable Receiver interrupt */
+//     UART_ITConfig (MDR_UART2, UART_IT_RX, ENABLE);
+// 	UART_ITConfig (MDR_UART2, UART_IT_RT, ENABLE);    // iterrupt timeout rx
+//     /* Enables UART2 peripheral */
+//     UART_Cmd(MDR_UART2,ENABLE);
+// }
 
 void sendByte(uint16_t Data)
 {

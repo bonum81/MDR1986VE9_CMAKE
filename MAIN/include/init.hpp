@@ -24,11 +24,11 @@
 #define SPI1_MISO PORT_Pin_3
 #define SPI1_RST_W5500 PORT_Pin_1
 
-// #ifdef __cplusplus
-// extern "C"{
-// #endif
+#ifdef __cplusplus
+extern "C"{
+#endif
 
-//Include C libs//
+/*--Include C libs--*/
 
 #include "MDR32Fx.h"
 #include "MDR32F9Qx_it.h"
@@ -40,29 +40,23 @@
 #include "MDR32F9Qx_can.h"
 #include <stdbool.h>
 
-// #ifdef __cplusplus
-// }
-// #endif
-
-
-typedef struct
-{
-    uint16_t BaudRate; //= 0xFD00;
-    bool StopBits; //= 0;
-    bool EnParity; //= 0;
-    bool BitParity; //= 0;
-}UARTSettings;
+#ifdef __cplusplus
+}
+#endif
 
 void init_GPIO_CAN(void);
 void init_GPIO_UART(void);
-void SetUARTSettings(UARTSettings settings);
 void sendByte(uint16_t Data);
 void sendBuf(uint8_t* buf, uint8_t size);
-
-
 void init_clk(void);
-void init_leds();
+void init_leds(void);
 void init_SPI(void);
 void write_LED(uint16_t PORT_Pin, FunctionalState state);
 void init_Timers(MDR_TIMER_TypeDef* periphealTimer);
+
+
+
+
+
+
 #endif
