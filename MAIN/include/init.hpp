@@ -22,11 +22,16 @@
 #define SPI1_MISO PORT_Pin_3
 #define SPI1_RST_W5500 PORT_Pin_1
 
-// #ifdef __cplusplus
-// extern "C"{
-// #endif
+/*-----------------------------------------*/
+//    Defines for switches KL1 KL2
+/*-----------------------------------------*/
+#define KL1 PORT_Pin_5
+#define KL2 PORT_Pin_4
 
-//Include C libs//
+#ifdef __cplusplus
+extern "C"{
+#endif
+
 
 #include "MDR32Fx.h"
 #include "MDR32F9Qx_it.h"
@@ -38,9 +43,9 @@
 #include "MDR32F9Qx_can.h"
 #include <stdbool.h>
 
-// #ifdef __cplusplus
-// }
-// #endif
+#ifdef __cplusplus
+}
+#endif
 
 
 typedef struct
@@ -63,4 +68,5 @@ void init_leds();
 void init_SPI(void);
 void write_LED(uint16_t PORT_Pin, FunctionalState state);
 void init_Timers(MDR_TIMER_TypeDef* periphealTimer);
+void init_switches();
 #endif

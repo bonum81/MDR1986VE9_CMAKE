@@ -1,4 +1,4 @@
-#include "init.h"
+#include "init.hpp"
 
 
 void init_leds(){
@@ -20,6 +20,7 @@ void init_leds(){
     PORT_Init(LED_PORT, &gpio_led_port); 
 
 }
+
 
 void init_clk(void)
 {
@@ -66,20 +67,56 @@ void write_LED(uint16_t PORT_Pin, FunctionalState state)
 
 void init_Timers(MDR_TIMER_TypeDef* periphealTimer)
 {
-    MDR_RST_CLK->PER_CLOCK     |= 0x00010000;   // Enable tim2 clock
-    MDR_RST_CLK->TIM_CLOCK     |= (0x07)<<16;         // 48Mhz / 128 = 375kHz
-    MDR_RST_CLK->TIM_CLOCK     |= (1<<26);           // 48Mhz / 128 = 375kHz
+    if (periphealTimer == MDR_TIMER1)
+    {
+        MDR_RST_CLK->PER_CLOCK     |= 0x00004000;   // Enable tim1 clock
+        MDR_RST_CLK->TIM_CLOCK     |= (1<<24);         // 48Mhz / 128 = 375kHz
+        MDR_RST_CLK->TIM_CLOCK     |= 0x07;         // 48Mhz / 128 = 375kHz
 
-    periphealTimer->CNTRL       = 0x0;
-    periphealTimer->CNT         = 0x00000000;
-    periphealTimer->PSG         = 375-1;         // 750kHz / 75 = 10kHz
-    periphealTimer->ARR         = 50-1;      // 
-    periphealTimer->IE          = 0x00000002;
-            //MDR_RST_CLK->TIM_CLOCK     |= 0x04000006;   // 48Mhz / 4 = 750kHz
-    TIMER_ITConfig(MDR_TIMER3, TIMER_STATUS_CNT_ARR, ENABLE);
-    NVIC_EnableIRQ(TIMER3_IRQn);
+        periphealTimer->CNTRL       = 0x00000000;
+        periphealTimer->CNT         = 0x00000000;
+        periphealTimer->PSG         = 375-1;         // 750kHz / 75 = 10kHz
+        periphealTimer->ARR         = 1000-1;      // 
+        periphealTimer->IE          = 0x00000002;
+            //MDR_RST_CLK->TIM_CLOCK     |= 0x01000006;   // 48Mhz / 4 = 750kHz
+        TIMER_ITConfig(MDR_TIMER1, TIMER_STATUS_CNT_ARR, ENABLE);
+        NVIC_EnableIRQ(TIMER1_IRQn);
+    }
+    else if (periphealTimer == MDR_TIMER2)
+    {
+        MDR_RST_CLK->PER_CLOCK     |= 0x00008000;   // Enable tim2 clock
+        MDR_RST_CLK->TIM_CLOCK     |= (1<<25);         // 48Mhz / 128 = 375kHz
+        MDR_RST_CLK->TIM_CLOCK     |= (0x07)<<8;         // 48Mhz / 128 = 375kHz
+            
 
-     MDR_TIMER3->CNTRL |=(1 << 0);
+        periphealTimer->STATUS      = 0x0;
+        periphealTimer->CNTRL       = 0x00000000;
+        periphealTimer->CNT         = 0x00000000;
+        periphealTimer->PSG         = 375-1;         // 750kHz / 75 = 10kHz
+        periphealTimer->ARR         = 1000-1;      // 
+        periphealTimer->IE          = 0x00000002;
+            
+        //MDR_RST_CLK->TIM_CLOCK     |= 0x02000006;   // 48Mhz / 4 = 750kHz
+        TIMER_ITConfig(MDR_TIMER2, TIMER_STATUS_CNT_ARR, ENABLE);
+        NVIC_EnableIRQ(TIMER2_IRQn);
+    }
+    else if (periphealTimer == MDR_TIMER3)
+    {
+        MDR_RST_CLK->PER_CLOCK     |= 0x00010000;         // Разрешение тактирования
+        MDR_RST_CLK->TIM_CLOCK     |= (1<<26);           // Разрешение тактовой частоты на таймер
+        MDR_RST_CLK->TIM_CLOCK     |= (0x07)<<16;         // 48Mhz / 128 = 375kHz
+
+        periphealTimer->CNTRL       = 0x0;
+        periphealTimer->CNT         = 0x00000000;
+        periphealTimer->PSG         = 375-1;         // 750kHz / 75 = 10kHz
+        periphealTimer->ARR         = 200-1;      // 
+        periphealTimer->IE          = 0x00000002;
+        //MDR_RST_CLK->TIM_CLOCK     |= 0x04000006;   // 48Mhz / 4 = 750kHz
+        TIMER_ITConfig(MDR_TIMER3, TIMER_STATUS_CNT_ARR, ENABLE);
+        NVIC_EnableIRQ(TIMER3_IRQn);
+        //MDR_TIMER3->CNTRL |=(1 << 0);
+    }
+
 }
 
 
@@ -114,14 +151,14 @@ void init_SPI(void)
 
 	// Reset all SSP settings
 	SSP_DeInit(MDR_SSP1);
-	SSP_BRGInit(MDR_SSP1, SSP_HCLKdiv1); //SSP_HCLKdiv4
+	SSP_BRGInit(MDR_SSP1, SSP_HCLKdiv1); // 48 Mhz / 1 = 48 Mhz
 
 	// SSP2 MASTER configuration ------------------------------------------------
 	SSP_StructInit(&sSSP);
 	sSSP.SSP_SPH = SSP_SPH_1Edge;
 	sSSP.SSP_SPO = SSP_SPO_Low;
-	sSSP.SSP_SCR = 0;  //1
-	sSSP.SSP_CPSDVSR = 2; //12;//0x03;//0x05;  3  2  3
+	sSSP.SSP_SCR = 0;  //
+	sSSP.SSP_CPSDVSR = 2; //    48 Mhz / 2 = 24 Mhz (this diviner multiple of 2)
 	sSSP.SSP_Mode = SSP_ModeMaster;
 	sSSP.SSP_WordLength = SSP_WordLength8b;
 	sSSP.SSP_FRF = SSP_FRF_SPI_Motorola;
@@ -168,11 +205,27 @@ void init_GPIO_UART(void)
 void init_GPIO_CAN(void)
 {
     PORT_InitTypeDef PORT_InitCAN;
+    PORT_InitTypeDef switches_port;
+
 
     RST_CLK_PCLKcmd(RST_CLK_PCLK_PORTA, ENABLE);
 	
 	PORT_DeInit(MDR_PORTA);
 	
+
+    /* Configure PIN for Switches KL1 and KL2 */
+
+    switches_port.PORT_Pin = KL1 | KL2;
+    switches_port.PORT_MODE = PORT_MODE_DIGITAL;
+    switches_port.PORT_FUNC = PORT_FUNC_PORT;
+    switches_port.PORT_OE   = PORT_OE_IN;
+    switches_port.PORT_PULL_DOWN = PORT_PULL_DOWN_ON;
+    switches_port.PORT_SPEED = PORT_SPEED_FAST;
+
+    PORT_Init(MDR_PORTA, &switches_port);
+
+
+
 	/* Fill PortInit structure*/
     PORT_InitCAN.PORT_PULL_UP = PORT_PULL_UP_OFF;
     PORT_InitCAN.PORT_PULL_DOWN = PORT_PULL_DOWN_OFF;

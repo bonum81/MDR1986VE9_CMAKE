@@ -15,8 +15,8 @@ extern "C"{
 
 typedef struct 
 {
-    uint8_t  ID;// = 0x00;
-    uint16_t baudRate;// = 0x0000;
+    uint8_t  ID = 0x00;
+    uint16_t baudRate = 0x0000;
 }GenSetCAN;
 
 typedef struct 
@@ -31,7 +31,7 @@ typedef struct
 
 void canSettingsHandler();
 void CAN_SendMsg(FT_ProtocolPackageStruct *package);
-//void init_GPIO_CAN(void);
+void init_GPIO_CAN(void);
 extern GenSetCAN GeneralSettingsCAN;
 
 #endif

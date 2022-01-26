@@ -1,6 +1,12 @@
-#include "can.h"
-#include "init.h"
+#include "can.hpp"
+#include "ParamSys.hpp"
+#include "ft_can.hpp"
+#include "init.hpp"
+#include "ft_can.hpp"
 
+
+
+extern CurState CurrentState;
 GenSetCAN GeneralSettingsCAN;
 uint16_t massiveParameterNumber = 0; 
 
@@ -87,7 +93,7 @@ void CAN_NegativeMsg(FT_ProtocolPackageStruct *package)
 
 static uint32_t SyncMemory(FT_ProtocolPackageStruct *Package)
 {
-	//ParametersSystem.doMemorySync();
+	ParametersSystem.doMemorySync();
 	FT_ProtocolPackageStruct responsePackage;
     responsePackage.destinationAddress = Package->sourceAddress;
 	responsePackage.packageNumber = Package->packageNumber;
@@ -113,57 +119,57 @@ uint32_t NOPE(FT_ProtocolPackageStruct *Package)
 uint32_t ReadParam(FT_ProtocolPackageStruct *receivePackage)
 {
     FT_ProtocolPackageStruct responsePackage;
-    // responsePackage.destinationAddress = receivePackage->sourceAddress;
-    // uint16_t paramNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
-    // ParamDescript Param = ParametersSystem.getParameter(paramNumber);
-	// responsePackage.packageNumber = receivePackage->packageNumber;
-    // responsePackage.responseTypeSign = 0;
-    // responsePackage.sourceAddress = GeneralSettingsCAN.ID;
-	// /*
-	// if((Param.ParametersAddress == 0) || (Param.Description.readProtectionType > CurrentState.currentAccessLevel))
-	// {
-	// 	CAN_NegativeMsg(&responsePackage);
-	// 	return 0;
-	// }
-	// */
-    // //================== Проверка на наличие параметра ====================//
-	// uint8_t *temporaryParameter = (uint8_t*)Param.ParametersAddress;
-	// if(Param.Description.bitTag == 0)
-	// {
-	// 	for(int i = 0; i < Param.Description.parameterSize; i++)
-	// 	{
-	// 		responsePackage.data[i + 1] = (*(uint8_t*)(temporaryParameter));
-	// 		temporaryParameter++;
-	// 	}
-	// 	responsePackage.packageLength = Param.Description.parameterSize + 1;
-	// }else{
-	// 	responsePackage.data[1] = ((*(uint8_t*)(temporaryParameter)) & (0x1 << Param.Description.parameterSize)) >> Param.Description.parameterSize;
-	// 	responsePackage.packageLength = 2;
-	// }
+    responsePackage.destinationAddress = receivePackage->sourceAddress;
+    uint16_t paramNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
+    ParamDescript Param = ParametersSystem.getParameter(paramNumber);
+	responsePackage.packageNumber = receivePackage->packageNumber;
+    responsePackage.responseTypeSign = 0;
+    responsePackage.sourceAddress = GeneralSettingsCAN.ID;
+	/*
+	if((Param.ParametersAddress == 0) || (Param.Description.readProtectionType > CurrentState.currentAccessLevel))
+	{
+		CAN_NegativeMsg(&responsePackage);
+		return 0;
+	}
+	*/
+    //================== Проверка на наличие параметра ====================//
+	uint8_t *temporaryParameter = (uint8_t*)Param.ParametersAddress;
+	if(Param.Description.bitTag == 0)
+	{
+		for(int i = 0; i < Param.Description.parameterSize; i++)
+		{
+			responsePackage.data[i + 1] = (*(uint8_t*)(temporaryParameter));
+			temporaryParameter++;
+		}
+		responsePackage.packageLength = Param.Description.parameterSize + 1;
+	}else{
+		responsePackage.data[1] = ((*(uint8_t*)(temporaryParameter)) & (0x1 << Param.Description.parameterSize)) >> Param.Description.parameterSize;
+		responsePackage.packageLength = 2;
+	}
     CAN_SendMsg(&responsePackage);
     return 0;
 }
 
 uint32_t WriteParam(FT_ProtocolPackageStruct *receivePackage)
 {
-	// uint16_t paramNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
-	// uint32_t newParameterValue = 0;
-	// for(int i = 0; i < 4; i++)
-	// {
-	// 	newParameterValue = newParameterValue | (receivePackage->data[i + 4] << (i * 8));
-	// }
-	// ParamDescript Param = ParametersSystem.getParameter(paramNumber);
+	uint16_t paramNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
+	uint32_t newParameterValue = 0;
+	for(int i = 0; i < 4; i++)
+	{
+		newParameterValue = newParameterValue | (receivePackage->data[i + 4] << (i * 8));
+	}
+	ParamDescript Param = ParametersSystem.getParameter(paramNumber);
     FT_ProtocolPackageStruct responsePackage;
-    // responsePackage.destinationAddress = receivePackage->sourceAddress;
-	// responsePackage.packageNumber 	 = receivePackage->packageNumber;
-    // responsePackage.responseTypeSign = 0;
-    // responsePackage.sourceAddress  	 = GeneralSettingsCAN.ID;
-	// if((Param.ParametersAddress == 0) || (Param.Description.writeProtectionType > CurrentState.currentAccessLevel) || (Param.Description.writeProtectionType == 0))
-	// {
-	// 	CAN_NegativeMsg(&responsePackage);
-	// 	return 0;
-	// }
-	// ParametersSystem.setParameter(paramNumber, newParameterValue);
+    responsePackage.destinationAddress = receivePackage->sourceAddress;
+	responsePackage.packageNumber 	 = receivePackage->packageNumber;
+    responsePackage.responseTypeSign = 0;
+    responsePackage.sourceAddress  	 = GeneralSettingsCAN.ID;
+	if((Param.ParametersAddress == 0) || (Param.Description.writeProtectionType > CurrentState.currentAccessLevel) || (Param.Description.writeProtectionType == 0))
+	{
+		CAN_NegativeMsg(&responsePackage);
+		return 0;
+	}
+	ParametersSystem.setParameter(paramNumber, newParameterValue);
 	//добавить проверку о соответствии параметра
     CAN_PositiveMsg(&responsePackage);
     return 0;
@@ -171,52 +177,52 @@ uint32_t WriteParam(FT_ProtocolPackageStruct *receivePackage)
 
 uint32_t SetMassiveParameterNumber(FT_ProtocolPackageStruct *receivePackage)
 {
-	// FT_ProtocolPackageStruct responsePackage;
-    // responsePackage.destinationAddress = receivePackage->sourceAddress;
-    // uint16_t paramNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
-    // ParamDescript Param = ParametersSystem.getParameter(paramNumber);
-	// responsePackage.packageNumber 	 = receivePackage->packageNumber;
-    // responsePackage.responseTypeSign = 0;
-    // responsePackage.sourceAddress  	 = GeneralSettingsCAN.ID;
-	// if(Param.ParametersAddress == 0)
-	// {
-	// 	CAN_NegativeMsg(&responsePackage);
-	// 	return 0;
-	// }
-	// if(Param.Description.massiveTag != 0)
-	// {
-	// 	massiveParameterNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
-	// 	CAN_PositiveMsg(&responsePackage);
-	// }else
-	// {
-	// 	CAN_NegativeMsg(&responsePackage);
-	// }
+	FT_ProtocolPackageStruct responsePackage;
+    responsePackage.destinationAddress = receivePackage->sourceAddress;
+    uint16_t paramNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
+    ParamDescript Param = ParametersSystem.getParameter(paramNumber);
+	responsePackage.packageNumber 	 = receivePackage->packageNumber;
+    responsePackage.responseTypeSign = 0;
+    responsePackage.sourceAddress  	 = GeneralSettingsCAN.ID;
+	if(Param.ParametersAddress == 0)
+	{
+		CAN_NegativeMsg(&responsePackage);
+		return 0;
+	}
+	if(Param.Description.massiveTag != 0)
+	{
+		massiveParameterNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
+		CAN_PositiveMsg(&responsePackage);
+	}else
+	{
+		CAN_NegativeMsg(&responsePackage);
+	}
 	return 0;	
 }
 
 uint32_t ReadMassiveParam(FT_ProtocolPackageStruct *receivePackage)
 {
     FT_ProtocolPackageStruct responsePackage;
-    // responsePackage.destinationAddress = receivePackage->sourceAddress;
-    // uint16_t paramNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
-	// uint32_t massiveIndex = (receivePackage->data[6] << 16) | (receivePackage->data[5] << 8) | receivePackage->data[4];
-	// ParamDescript Param = ParametersSystem.getMassiveParameter(paramNumber, massiveIndex);
-    // //================== Проверка на наличие параметра ====================//
-	// uint8_t *temporaryParameter = (uint8_t*)Param.ParametersAddress;
-    // responsePackage.packageNumber = receivePackage->packageNumber;
-    // responsePackage.responseTypeSign = 0;
-    // responsePackage.sourceAddress = GeneralSettingsCAN.ID;
-    // responsePackage.packageLength = Param.Description.parameterSize + 1;
-	// if((Param.ParametersAddress == 0) || (Param.Description.readProtectionType > CurrentState.currentAccessLevel))
-	// {
-	// 	CAN_NegativeMsg(&responsePackage);
-	// 	return 0;
-	// }
-	// for(int i = 0; i < Param.Description.parameterSize; i++)
-    // {
-	// 	responsePackage.data[i + 1] = (*(uint8_t*)(temporaryParameter));
-	// 	temporaryParameter++;
-    // }
+    responsePackage.destinationAddress = receivePackage->sourceAddress;
+    uint16_t paramNumber = (receivePackage->data[3] << 8) | (receivePackage->data[2]);
+	uint32_t massiveIndex = (receivePackage->data[6] << 16) | (receivePackage->data[5] << 8) | receivePackage->data[4];
+	ParamDescript Param = ParametersSystem.getMassiveParameter(paramNumber, massiveIndex);
+    //================== Проверка на наличие параметра ====================//
+	uint8_t *temporaryParameter = (uint8_t*)Param.ParametersAddress;
+    responsePackage.packageNumber = receivePackage->packageNumber;
+    responsePackage.responseTypeSign = 0;
+    responsePackage.sourceAddress = GeneralSettingsCAN.ID;
+    responsePackage.packageLength = Param.Description.parameterSize + 1;
+	if((Param.ParametersAddress == 0) || (Param.Description.readProtectionType > CurrentState.currentAccessLevel))
+	{
+		CAN_NegativeMsg(&responsePackage);
+		return 0;
+	}
+	for(int i = 0; i < Param.Description.parameterSize; i++)
+    {
+		responsePackage.data[i + 1] = (*(uint8_t*)(temporaryParameter));
+		temporaryParameter++;
+    }
     CAN_SendMsg(&responsePackage);
     return 0;
 }
@@ -224,29 +230,29 @@ uint32_t ReadMassiveParam(FT_ProtocolPackageStruct *receivePackage)
 uint32_t WriteMassiveParam(FT_ProtocolPackageStruct *receivePackage)
 {
     FT_ProtocolPackageStruct responsePackage;
-    // responsePackage.destinationAddress = receivePackage->sourceAddress;
-    // //================== Проверка на наличие параметра ====================//
-	// uint32_t massiveIndex = (receivePackage->data[3] << 8) | receivePackage->data[2];
-	// uint32_t newParameterValue = 0;
-    // responsePackage.packageNumber = receivePackage->packageNumber;
-    // responsePackage.responseTypeSign = 0;
-    // responsePackage.sourceAddress = GeneralSettingsCAN.ID;
-    // responsePackage.packageLength = 2;
-	// for(int i = 0; i < 4; i++)
-	// {
-	// 	newParameterValue = newParameterValue | (receivePackage->data[i + 4] << (i * 8));
-	// }
-	// if(massiveParameterNumber == 0)
-	// {
-	// 	CAN_NegativeMsg(&responsePackage);
-	// 	return 0;
-	// }
-	// ParamDescript Param = ParametersSystem.setMassiveParameter(massiveParameterNumber, massiveIndex, newParameterValue);
-	// if((Param.ParametersAddress == 0) || (Param.Description.writeProtectionType > CurrentState.currentAccessLevel) || (Param.Description.writeProtectionType == 0))
-	// {
-	// 	CAN_NegativeMsg(&responsePackage);
-	// 	return 0;
-	// }
+    responsePackage.destinationAddress = receivePackage->sourceAddress;
+    //================== Проверка на наличие параметра ====================//
+	uint32_t massiveIndex = (receivePackage->data[3] << 8) | receivePackage->data[2];
+	uint32_t newParameterValue = 0;
+    responsePackage.packageNumber = receivePackage->packageNumber;
+    responsePackage.responseTypeSign = 0;
+    responsePackage.sourceAddress = GeneralSettingsCAN.ID;
+    responsePackage.packageLength = 2;
+	for(int i = 0; i < 4; i++)
+	{
+		newParameterValue = newParameterValue | (receivePackage->data[i + 4] << (i * 8));
+	}
+	if(massiveParameterNumber == 0)
+	{
+		CAN_NegativeMsg(&responsePackage);
+		return 0;
+	}
+	ParamDescript Param = ParametersSystem.setMassiveParameter(massiveParameterNumber, massiveIndex, newParameterValue);
+	if((Param.ParametersAddress == 0) || (Param.Description.writeProtectionType > CurrentState.currentAccessLevel) || (Param.Description.writeProtectionType == 0))
+	{
+		CAN_NegativeMsg(&responsePackage);
+		return 0;
+	}
 	CAN_PositiveMsg(&responsePackage);
     return 0;
 }
@@ -255,98 +261,98 @@ uint32_t AccessLevel(FT_ProtocolPackageStruct *receivePackage)
 {  
 	volatile uint32_t Password = 0;
 	FT_ProtocolPackageStruct responsePackage;
-    // responsePackage.destinationAddress = receivePackage->sourceAddress;
-    // responsePackage.packageNumber = receivePackage->packageNumber;
-    // responsePackage.responseTypeSign = 0;
-    // responsePackage.sourceAddress = GeneralSettingsCAN.ID;
-    // responsePackage.packageLength = 2;
-	// switch(receivePackage->data[2])
-	// {
-	// 	case 0x01:
-	// 	{
-	// 		responsePackage.data[1] = 0x01;
-	// 		CurrentState.currentAccessLevel = 1;
-	// 		CAN_SendMsg(&responsePackage);
-	// 		break;
-	// 	}
-	// 	case 0x02:
-	// 	{
-	// 		uint32_t *StartAddress = ParametersSystem.getParameter(0xF025).ParametersAddress;
-	// 		if(receivePackage->packageLength == 3)
-	// 		{
-	// 			if((*(StartAddress) == 0xFFFFFFFF) || (*(StartAddress) == 0x00000000))
-	// 			{
-	// 				responsePackage.data[1] = 0x02;
-	// 				CurrentState.currentAccessLevel = 2;
-	// 				CAN_SendMsg(&responsePackage);
-	// 			}else
-	// 			{
-	// 				responsePackage.data[1] = 0x01;
-	// 				CurrentState.currentAccessLevel = 1;
-	// 				CAN_SendMsg(&responsePackage);
-	// 			}
-	// 		}else if(receivePackage->packageLength == 7)
-	// 		{
-	// 			for(int i = 0; i < 4; i++)
-	// 			{
-	// 				Password |= receivePackage->data[i + 3] << i * 8;
-	// 			}
-	// 			if(*(__IO uint32_t*)(StartAddress) == Password)
-	// 			{
-	// 				responsePackage.data[1] = 0x02;
-	// 				CurrentState.currentAccessLevel = 2;
-	// 				CAN_SendMsg(&responsePackage);
-	// 			}else
-	// 			{
-	// 				responsePackage.data[1] = 0x01;
-	// 				CurrentState.currentAccessLevel = 1;
-	// 				CAN_SendMsg(&responsePackage);
-	// 			}
-	// 		}
-	// 		break;
-	// 	}
-	// 	case 0x03:
-	// 	{
-	// 		uint32_t devicePassword = *(uint32_t*)ParametersSystem.getParameter(0xF026).ParametersAddress;
-	// 		if(receivePackage->packageLength == 3)
-	// 		{
-	// 			if((devicePassword == 0xFFFFFFFF) || (devicePassword == 0x00000000))
-	// 			{
-	// 				responsePackage.data[1] = 0x03;
-	// 				CurrentState.currentAccessLevel = 3;
-	// 				CAN_SendMsg(&responsePackage);
-	// 			}else
-	// 			{
-	// 				responsePackage.data[1] = 0x01;
-	// 				CurrentState.currentAccessLevel = 1;
-	// 				CAN_SendMsg(&responsePackage);
-	// 			}
-	// 		}else if(receivePackage->packageLength == 7)
-	// 		{
-	// 			for(int i = 0; i < 4; i++)
-	// 			{
-	// 				Password |= receivePackage->data[i + 3] << i * 8;
-	// 			}
-	// 			if(devicePassword == Password)
-	// 			{
-	// 				responsePackage.data[1] = 0x03;
-	// 				CurrentState.currentAccessLevel = 3;
-	// 				CAN_SendMsg(&responsePackage);
-	// 			}else
-	// 			{
-	// 				responsePackage.data[1] = 0x01;
-	// 				CurrentState.currentAccessLevel = 1;
-	// 				CAN_SendMsg(&responsePackage);
-	// 			}
-	// 		}
-	// 		break;
-	// 	}
-	// 	default:
-	// 	{
-	// 		CAN_NegativeMsg(&responsePackage);
-	// 		break;
-	// 	}
-	// }
+    responsePackage.destinationAddress = receivePackage->sourceAddress;
+    responsePackage.packageNumber = receivePackage->packageNumber;
+    responsePackage.responseTypeSign = 0;
+    responsePackage.sourceAddress = GeneralSettingsCAN.ID;
+    responsePackage.packageLength = 2;
+	switch(receivePackage->data[2])
+	{
+		case 0x01:
+		{
+			responsePackage.data[1] = 0x01;
+			CurrentState.currentAccessLevel = 1;
+			CAN_SendMsg(&responsePackage);
+			break;
+		}
+		case 0x02:
+		{
+			uint32_t *StartAddress = ParametersSystem.getParameter(0xF025).ParametersAddress;
+			if(receivePackage->packageLength == 3)
+			{
+				if((*(StartAddress) == 0xFFFFFFFF) || (*(StartAddress) == 0x00000000))
+				{
+					responsePackage.data[1] = 0x02;
+					CurrentState.currentAccessLevel = 2;
+					CAN_SendMsg(&responsePackage);
+				}else
+				{
+					responsePackage.data[1] = 0x01;
+					CurrentState.currentAccessLevel = 1;
+					CAN_SendMsg(&responsePackage);
+				}
+			}else if(receivePackage->packageLength == 7)
+			{
+				for(int i = 0; i < 4; i++)
+				{
+					Password |= receivePackage->data[i + 3] << i * 8;
+				}
+				if(*(__IO uint32_t*)(StartAddress) == Password)
+				{
+					responsePackage.data[1] = 0x02;
+					CurrentState.currentAccessLevel = 2;
+					CAN_SendMsg(&responsePackage);
+				}else
+				{
+					responsePackage.data[1] = 0x01;
+					CurrentState.currentAccessLevel = 1;
+					CAN_SendMsg(&responsePackage);
+				}
+			}
+			break;
+		}
+		case 0x03:
+		{
+			uint32_t devicePassword = *(uint32_t*)ParametersSystem.getParameter(0xF026).ParametersAddress;
+			if(receivePackage->packageLength == 3)
+			{
+				if((devicePassword == 0xFFFFFFFF) || (devicePassword == 0x00000000))
+				{
+					responsePackage.data[1] = 0x03;
+					CurrentState.currentAccessLevel = 3;
+					CAN_SendMsg(&responsePackage);
+				}else
+				{
+					responsePackage.data[1] = 0x01;
+					CurrentState.currentAccessLevel = 1;
+					CAN_SendMsg(&responsePackage);
+				}
+			}else if(receivePackage->packageLength == 7)
+			{
+				for(int i = 0; i < 4; i++)
+				{
+					Password |= receivePackage->data[i + 3] << i * 8;
+				}
+				if(devicePassword == Password)
+				{
+					responsePackage.data[1] = 0x03;
+					CurrentState.currentAccessLevel = 3;
+					CAN_SendMsg(&responsePackage);
+				}else
+				{
+					responsePackage.data[1] = 0x01;
+					CurrentState.currentAccessLevel = 1;
+					CAN_SendMsg(&responsePackage);
+				}
+			}
+			break;
+		}
+		default:
+		{
+			CAN_NegativeMsg(&responsePackage);
+			break;
+		}
+	}
 	return 0;
 }
 
@@ -479,26 +485,26 @@ uint32_t errorCodeFunction(FT_ProtocolPackageStruct* receivePacket)
 
 uint32_t receiveResponseFunction(FT_ProtocolPackageStruct* receivePacket)
 {
-	// FT_ProtocolDequeStruct *CanPacket;
+	FT_ProtocolDequeStruct *CanPacket;   //? Указатель на элемент в очереди
 	
-	// CanPacket = ControllerAreaNetwork::getFrontElementFromQueue();
-	// uint32_t dequeSize = ControllerAreaNetwork::CAN_GetDequeSize();
-	// if(dequeSize == 0)
-	// {
-	// 	return false;
-	// }
-	// if(CanPacket->package.packageNumber == receivePacket->packageNumber)
-	// {
-	// 	if(CanPacket->FunctionalCode > 2)
-	// 	{
-	// 		return false;
-	// 	}
-	// 	CanResponseTable[CanPacket->FunctionalCode](CanPacket, receivePacket);
-	// }else
-	// {
-	// 	ControllerAreaNetwork::updateFrontQueuePacket(CanPacket, true);
-	// 	return false;
-	// }
+	CanPacket = ControllerAreaNetwork::getFrontElementFromQueue(); // Получаем указатель на первый элемент в очереди
+	uint32_t dequeSize = ControllerAreaNetwork::CAN_GetDequeSize();	// Получаем текущий размер очереди
+	if(dequeSize == 0)
+	{
+		return false;	// Очередь пуста возвращаем false
+	}
+	if(CanPacket->package.packageNumber == receivePacket->packageNumber) // Проверка совпадения номера пакета в принятой посылке и посылке в очереди
+	{
+		if(CanPacket->FunctionalCode > 2) 
+		{
+			return false;
+		}
+		CanResponseTable[CanPacket->FunctionalCode](CanPacket, receivePacket); // вызываем соответствующий обработчик
+	}else
+	{
+		ControllerAreaNetwork::updateFrontQueuePacket(CanPacket, true);
+		return false;
+	}
 	return 0;
 }
 

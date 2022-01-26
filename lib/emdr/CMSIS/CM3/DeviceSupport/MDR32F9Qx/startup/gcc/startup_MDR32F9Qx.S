@@ -249,7 +249,7 @@ Reset_Handler:
 #ifndef __NO_SYSTEM_INIT
 	bl	SystemInit
 #endif
-
+	bl __libc_init_array
 #ifndef __START
 #define __START _start
 #endif

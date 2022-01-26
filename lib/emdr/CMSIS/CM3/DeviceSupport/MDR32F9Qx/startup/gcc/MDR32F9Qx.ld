@@ -1,8 +1,10 @@
 /* Linker script to configure memory regions */
 MEMORY
 {
-	FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 124K
-	FLASH_31 (rx) : ORIGIN = 0x0801F000, LENGTH = 4K
+	FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 116K
+	FLASH_28 (rx) : ORIGIN = 0x0801C000, LENGTH = 4K
+	FLASH_29 (rx) : ORIGIN = 0x0801D000, LENGTH = 4K
+	FLASH_30_31 (rx) : ORIGIN = 0x0801E000, LENGTH = 8K
 	RAM (rwx)  : ORIGIN = 0x20000000, LENGTH = 32K
 }
 
@@ -40,14 +42,30 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
-	.deviceParameters :
+	.deviceParameters (NOLOAD):
 	{
 		. = ALIGN(4);
 		*(.deviceParameters)           /* .plc sections (code) */
 		*(.deviceParameters*)          /* .plc* sections (code) */
 		. = ALIGN(4);
-	} >FLASH_31
+	} >FLASH_30_31
 	
+	.appProgramParameters (NOLOAD):
+	{
+		. = ALIGN(4);
+		*(.appProgramParameters)           /* .plc sections (code) */
+		*(.appProgramParameters*)          /* .plc* sections (code) */
+		. = ALIGN(4);
+	} >FLASH_29
+
+	.applicationProgram (NOLOAD):
+	{
+		. = ALIGN(4);
+		*(.applicationProgram)           /* .plc sections (code) */
+		*(.applicationProgram*)          /* .plc* sections (code) */
+		. = ALIGN(4);
+	} >FLASH_28
+
 	.text :
 	{
 		KEEP(*(.isr_vector))
@@ -124,6 +142,9 @@ SECTIONS
 	. = ALIGN(4);
 	__etext = .;
 
+
+
+
 	.data : AT (__etext)
 	{
 		__data_start__ = .;
@@ -192,4 +213,10 @@ SECTIONS
 
 	/* Check if data + heap + stack exceeds RAM limit */
 	ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
+	/DISCARD/ :
+	{
+		libc.a ( * )
+		libm.a ( * )
+		libgcc.a ( * )
+	}
 }

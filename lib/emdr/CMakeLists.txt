@@ -3,7 +3,7 @@ add_library(stddrv STATIC
 	CMSIS/CM3/DeviceSupport/MDR32F9Qx/startup/system_MDR32F9Qx.c
 	#MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_adc.c
 	#MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_dac.c
-	#MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_eeprom.c
+	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_eeprom.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_port.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_can.c
 	MDR32F9Qx_StdPeriph_Driver/src/MDR32F9Qx_rst_clk.c

@@ -40,6 +40,7 @@
   * @{
   */
 
+
 /**
   * @brief  Update SystemCoreClock according to Clock Register Values
   * @note   None
@@ -148,6 +149,7 @@ void SystemInit (void)
 
   SystemCoreClockUpdate();
 }
+
 
 /** @} */ /* End of group __MDR32F9QX_System_Private_Functions */
 

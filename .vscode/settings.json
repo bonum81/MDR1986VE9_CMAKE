@@ -17,7 +17,16 @@
       "w5500.h": "c",
       "wizchip_conf.h": "c",
       "init.h": "c",
-      "paramsys.h": "c"
+      "paramsys.h": "c",
+      "can.h": "c",
+      "array": "cpp",
+      "string": "cpp",
+      "string_view": "cpp",
+      "deque": "cpp",
+      "list": "cpp",
+      "unordered_map": "cpp",
+      "vector": "cpp",
+      "initializer_list": "cpp"
     },
     "terminal.integrated.profiles.windows": {
         "PowerShell -NoProfile": {

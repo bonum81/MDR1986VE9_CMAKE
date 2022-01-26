@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.15.3)
 
-project(MDR32 VERSION 0.0.1 LANGUAGES C ASM)
+project(MDR32 VERSION 0.0.1 LANGUAGES C CXX ASM)
 
 enable_language(C ASM)
 set(CMAKE_C_STANDARD 11)
-#set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
@@ -33,7 +33,7 @@ add_compile_options(
 	#-Wsign-conversion
 	-ffunction-sections
 	-fdata-sections
-	#$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
+	$<$<COMPILE_LANGUAGE:CXX>:-fno-rtti>
 )
 
 
@@ -42,7 +42,8 @@ add_link_options(
 	-lc
 	-lm
 	-lnosys
-	#-lstdc++
+	-lstdc++
+	--xref
 	--specs=nano.specs
 	--specs=nosys.specs
 	-Wl,--gc-sections
@@ -58,18 +59,39 @@ add_subdirectory(lib)
 #Add main includes directory
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/include
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/ParamSys
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/ParamSys/ParamHandlers
+	${CMAKE_CURRENT_SOURCE_DIR}/Peripheals/Timers
+	${CMAKE_CURRENT_SOURCE_DIR}/Peripheals/CAN
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/Protocols/
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/SwTimers/
 )
 
 
 
 #Add main src files
-set(SRC
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/app.c
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/init.c
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/can.c
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/ft_protocol.c
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/paramsys.c
-	)
+file(GLOB MainSRC ${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/*.cpp)
+file(GLOB CoreParamSysSRC ${CMAKE_CURRENT_SOURCE_DIR}/Core/ParamSys/*.cpp)
+file(GLOB CoreSwTimersSRC ${CMAKE_CURRENT_SOURCE_DIR}/Core/SwTimers/*.cpp)
+file(GLOB CoreParamHandlersSRC ${CMAKE_CURRENT_SOURCE_DIR}/Core/ParamSys/ParamHandlers/*.cpp)
+file(GLOB CoreProtocolsSRC ${CMAKE_CURRENT_SOURCE_DIR}/Core/Protocols/*.cpp)
+file(GLOB PeriphealsTimersSRC ${CMAKE_CURRENT_SOURCE_DIR}/Peripheals/Timers/*.cpp)
+file(GLOB PeriphealsCANSRC ${CMAKE_CURRENT_SOURCE_DIR}/Peripheals/CAN/*.cpp)
+
+set(SRC ${MainSRC}
+ 		${CoreParamSysSRC}
+		${CoreSwTimersSRC}
+		${CoreParamHandlersSRC}
+		${PeriphealsTimersSRC}
+		${PeriphealsCANSRC}
+		${CoreProtocolsSRC}
+		)
+
+	#${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/app.c
+	#${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/init.c
+	#${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/can.c
+	#${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/ft_protocol.c
+	#${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/paramsys.c
 
 #Add freertos dir
 #set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS/)
