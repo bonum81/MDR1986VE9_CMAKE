@@ -43,9 +43,10 @@
 #include <stdint.h>
 #include "MDR32Fx.h"
 
-extern uint32_t SystemCoreClock;
 
-#define configCPU_CLOCK_HZ                    (SystemCoreClock)
+#define SystemClock                           48000000
+
+#define configCPU_CLOCK_HZ                    (SystemClock)
 #define configTICK_RATE_HZ                    ((TickType_t)1000)
 #define configTOTAL_HEAP_SIZE                 ((size_t)(10 * 1024))
 #define configMINIMAL_STACK_SIZE              ((unsigned short)130)

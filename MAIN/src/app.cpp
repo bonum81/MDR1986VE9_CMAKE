@@ -24,26 +24,21 @@
 /* Includes HPP --------------------------------------------------------------*/
 #include <FreeRTOS.h>
 #include <task.h>
+#include <MDR32F9Qx_eeprom.h>
+#include "ParamSys.hpp"
+#include "can.hpp"
 #include "app.hpp"
 #include "init.hpp"
-#include "timers.hpp"
 /* Private define ------------------------------------------------------------*/
-#define BUFFER_LENGTH                        100
+
 
 /* Private variables ---------------------------------------------------------*/
-
-
-
-
-/* Private function prototypes -----------------------------------------------*/
-
-volatile uint32_t ticks_delay;
-
-void SysTickTimerInit();
-void delay(const uint32_t milliseconds);
+UARTSettings RS232_Set;
+uint32_t test = 0;
+uint32_t* ptest;
+/* Tasks FreeRTOS -----------------------------------------------*/
 static void vBlink_0_Task( void * );
 
-Timers MyTimer(10);
 
 
 int main()
@@ -51,28 +46,41 @@ int main()
     init_clk();
     init_leds();
     init_GPIO_CAN();
+    init_GPIO_UART();
+    init_SPI();
+    // EEPROM_SetLatency(EEPROM_Latency_1);
+    // EEPROM_ErasePage(0x0801E000, EEPROM_Main_Bank_Select);
+    // EEPROM_ProgramWord(0x0801E000, EEPROM_Main_Bank_Select, 0x11223344);
+    // test = EEPROM_ReadWord(0x0801E000, EEPROM_Main_Bank_Select);
+
+    write_LED(LED_CANTX, DISABLE);
+    write_LED(LED_CANRX, DISABLE);
+    write_LED(LED_RSTX, DISABLE);
+    write_LED(LED_RSRX, DISABLE);
+
+    GeneralSettingsCAN.ID = 0x01;
+    GeneralSettingsCAN.baudRate = 0x41E0;
+    canSettingsHandler();
+
+    RS232_Set.BaudRate = 0xFD00; 
+    RS232_Set.EnParity = 0;
+    RS232_Set.BitParity = 0;
+    RS232_Set.StopBits = 1;
+    SetUARTSettings(RS232_Set);
+
+    InitW5500();
+    TCP_Connection();
+
+
+    ParametersSystem.startParametersSystem();
+
     xTaskCreate( vBlink_0_Task, "Blink_0", 50, ( void * ) 1, tskIDLE_PRIORITY+1, ( TaskHandle_t * ) 1);
+    xTaskCreate( vReceiveW5500, "ReceiveW5500", 50, (void *)1, tskIDLE_PRIORITY+2,( TaskHandle_t * ) 1);
     vTaskStartScheduler();  
-    //SysTickTimerInit();
-    //testTimer = new Timers(32768);
-    uint32_t val = MyTimer.ReturnValue();
     
     while (1)
     {   
-        // PORT_SetBits(LED_PORT, LED_CAN1_TX);
-        // PORT_SetBits(LED_PORT, LED_CAN1_RX);
-        // PORT_SetBits(LED_PORT, LED_CAN2_TX);
-        // PORT_SetBits(LED_PORT, LED_CAN2_RX);
-        // PORT_SetBits(LED_PORT, LED_USB_TX);
-        // PORT_SetBits(LED_PORT, LED_USB_RX);
-        // delay(500);
-        // PORT_ResetBits(LED_PORT, LED_CAN1_TX);
-        // PORT_ResetBits(LED_PORT, LED_CAN1_RX);
-        // PORT_ResetBits(LED_PORT, LED_CAN2_TX);
-        // PORT_ResetBits(LED_PORT, LED_CAN2_RX);
-        // PORT_ResetBits(LED_PORT, LED_USB_TX);
-        // PORT_ResetBits(LED_PORT, LED_USB_RX);
-        // delay(500);  
+
     }
     
 }
@@ -81,52 +89,18 @@ static void vBlink_0_Task( void *pvParameters)
 {
     for( ;; )
     {
-    PORT_SetBits(LED_PORT, LED_CAN1_TX);
-    vTaskDelay( 500 );
-    PORT_ResetBits(LED_PORT, LED_CAN1_TX);
-    vTaskDelay( 2500 );
+    write_LED(LED_CANTX, DISABLE);
+    write_LED(LED_CANRX, DISABLE);
+    write_LED(LED_RSTX, DISABLE);
+    write_LED(LED_RSRX, DISABLE);
+
+    vTaskDelay( 100 );
     }
 }
 
-void SysTickTimerInit()
-{
-    SysTick->LOAD = 48000-1;
-    SysTick->CTRL |= SysTick_CTRL_CLKSOURCE_Msk;
-    SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
-
-    NVIC_EnableIRQ(SysTick_IRQn);
-    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-}
-
-void delay(const uint32_t milliseconds) 
-{
-
-    uint32_t start = ticks_delay;
-
-    while((ticks_delay - start) < milliseconds);
-
-}
 
 
 
 
-#if defined(__cplusplus)
-extern "C"{
-#endif  
-
-// void SysTick_Handler(void)
-// {
-// 	ticks_delay++;
-//     // write_LED(LED_RSTX, DISABLE);
-//     // write_LED(LED_RSRX, DISABLE);
-//     // write_LED(LED_CANTX, DISABLE);
-//     // write_LED(LED_CANRX, DISABLE);
-// }
-
-
-
-#if defined(__cplusplus)
-}
-#endif
 
 

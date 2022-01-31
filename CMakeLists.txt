@@ -58,18 +58,28 @@ add_subdirectory(lib)
 #Add main includes directory
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/include/
-	${CMAKE_CURRENT_SOURCE_DIR}/Core/Timers/
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/ParamSys
+	${CMAKE_CURRENT_SOURCE_DIR}/Core/ParamSys/ParamHandlers
+	${CMAKE_CURRENT_SOURCE_DIR}/Peripheals/CAN
 )
 
 
-
 #Add main src files
-set(SRC
-	#${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/syscall.c
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/app.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/init.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Core/Timers/timers.cpp
-	)
+file(GLOB MainSRC ${CMAKE_CURRENT_SOURCE_DIR}/MAIN/src/*.cpp)
+file(GLOB CoreParamSysSRC ${CMAKE_CURRENT_SOURCE_DIR}/Core/ParamSys/*.cpp)
+file(GLOB CoreSwTimersSRC ${CMAKE_CURRENT_SOURCE_DIR}/Core/SwTimers/*.cpp)
+file(GLOB CoreParamHandlersSRC ${CMAKE_CURRENT_SOURCE_DIR}/Core/ParamSys/ParamHandlers/*.cpp)
+file(GLOB PeriphealsCANSRC ${CMAKE_CURRENT_SOURCE_DIR}/Peripheals/CAN/*.cpp)
+
+
+set(SRC ${MainSRC}
+ 		${CoreParamSysSRC}
+		${CoreSwTimersSRC}
+		${CoreParamHandlersSRC}
+		${PeriphealsTimersSRC}
+		${PeriphealsCANSRC}
+		${CoreProtocolsSRC}
+		)
 
 #Add freertos dir
 set(FREERTOS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lib/FreeRTOS/)
@@ -86,6 +96,7 @@ include_directories(${FREERTOS_DIR}/portable/GCC/ARM_CM3)
 add_executable(${PROJECT_NAME} ${SRC} ${FREERTOS_SOURCES})
 #add_executable(${PROJECT_NAME} ${SRC})
 target_link_libraries(${PROJECT_NAME} stddrv)
+target_link_libraries(${PROJECT_NAME} w5500)
 #target_link_libraries(${PROJECT_NAME} freertos)
 
 #set_property(TARGET ${PROJECT_NAME} PROPERTY C_STANDARD 11)
