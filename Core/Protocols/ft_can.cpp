@@ -52,6 +52,7 @@ uint8_t packetNumber = 0;
 
 list <FT_ProtocolDequeStruct*> CanDeque;
 list <FT_ProtocolDequeStruct*>::iterator *CanDequeIterator;
+FT_ProtocolDequeStruct CanPacket;
 SwTimer CanFaultTimer(500, (void*)ControllerAreaNetwork::canTimeoutHandler, false);
 
 /* Private function prototypes -----------------------------------------------*/
@@ -325,7 +326,7 @@ namespace ControllerAreaNetwork
 uint32_t FT_receive_handler(uint8_t *buffer, uint32_t len)
 {
     //FT_ProtocolPackageStruct CanTxPackage;
-    FT_ProtocolDequeStruct *CanPacket = new FT_ProtocolDequeStruct;;
+    //FT_ProtocolDequeStruct *CanPacket = new FT_ProtocolDequeStruct;
 
         if ((buffer[0] != 0x10) && (buffer[0] != 0x68))
         {
@@ -335,26 +336,26 @@ uint32_t FT_receive_handler(uint8_t *buffer, uint32_t len)
         if ((buffer[6] == 0x14) && (len > 9)) // Передача во внешний модуль
         {
             packetNumber = buffer[4];
-            CanPacket->package.packageNumber = 0;
-            CanPacket->package.destinationAddress = buffer[8];
-            CanPacket->package.packageLength = buffer[7];
-            CanPacket->package.responseTypeSign = 1;
-            CanPacket->package.sourceAddress = GeneralSettingsCAN.ID;
-            CanPacket->package.data[0] = GeneralSettingsCAN.ID;
-            CanPacket->package.data[1] = buffer[9];  // Код команды 
-            CanPacket->package.data[2] = buffer[10];
-            CanPacket->package.data[3] = buffer[11];
-            CanPacket->package.data[4] = buffer[12];
-            CanPacket->package.data[5] = buffer[13];
-            CanPacket->package.data[6] = buffer[14];
-            CanPacket->package.data[7] = buffer[15];
-            CanPacket->InProgress = false;
-            CanPacket->FunctionalCode = 0x02; 
-            CanPacket->FTCommandCode = 0x14;
-            CanPacket->faultCounterLimit = 100;
-            CanPacket->faultCounter = 0;
-            CanPacket->resetFlag = false;
-            ControllerAreaNetwork::addPacketToQueue(CanPacket);
+            CanPacket.package.packageNumber = 0;
+            CanPacket.package.destinationAddress = buffer[8];
+            CanPacket.package.packageLength = buffer[7];
+            CanPacket.package.responseTypeSign = 1;
+            CanPacket.package.sourceAddress = GeneralSettingsCAN.ID;
+            CanPacket.package.data[0] = GeneralSettingsCAN.ID;
+            CanPacket.package.data[1] = buffer[9];  // Код команды 
+            CanPacket.package.data[2] = buffer[10];
+            CanPacket.package.data[3] = buffer[11];
+            CanPacket.package.data[4] = buffer[12];
+            CanPacket.package.data[5] = buffer[13];
+            CanPacket.package.data[6] = buffer[14];
+            CanPacket.package.data[7] = buffer[15];
+            CanPacket.InProgress = false;
+            CanPacket.FunctionalCode = 0x02; 
+            CanPacket.FTCommandCode = 0x14;
+            CanPacket.faultCounterLimit = 100;
+            CanPacket.faultCounter = 0;
+            CanPacket.resetFlag = false;
+            ControllerAreaNetwork::addPacketToQueue(&CanPacket);
 
             return 0;
         }
@@ -373,26 +374,26 @@ uint32_t FT_receive_handler(uint8_t *buffer, uint32_t len)
         else if((buffer[6] == 0x19) && (len > 9)) // Чтение индексного параметра из внешнего модуля
         {
             packetNumber = buffer[4];
-            CanPacket->package.packageNumber = 0;
-            CanPacket->package.destinationAddress = buffer[7];          // ИД кому
-            CanPacket->package.packageLength = 6;
-            CanPacket->package.responseTypeSign = 1;
-            CanPacket->package.sourceAddress = GeneralSettingsCAN.ID;  // Мой ИД
-            CanPacket->package.data[0] = GeneralSettingsCAN.ID;        // Мой Ид
-            CanPacket->package.data[1] = buffer[9];    // Код команды 
-            CanPacket->package.data[2] = buffer[10];   // Номер парметра
-            CanPacket->package.data[3] = buffer[11];   // Тип параметра
-            CanPacket->package.data[4] = buffer[12];   // Младший байт значения индекса
-            CanPacket->package.data[5] = buffer[13];   // Старший байт значения индекса
-            CanPacket->package.data[6] = buffer[14];   // No use 
-            CanPacket->package.data[7] = buffer[15];   // No use
-            CanPacket->InProgress = false;
-            CanPacket->FunctionalCode = 0x02; 
-            CanPacket->FTCommandCode = 0x19;
-            CanPacket->faultCounterLimit = 100;
-            CanPacket->faultCounter = 0;
-            CanPacket->resetFlag = false;
-            ControllerAreaNetwork::addPacketToQueue(CanPacket);
+            CanPacket.package.packageNumber = 0;
+            CanPacket.package.destinationAddress = buffer[7];          // ИД кому
+            CanPacket.package.packageLength = 6;
+            CanPacket.package.responseTypeSign = 1;
+            CanPacket.package.sourceAddress = GeneralSettingsCAN.ID;  // Мой ИД
+            CanPacket.package.data[0] = GeneralSettingsCAN.ID;        // Мой Ид
+            CanPacket.package.data[1] = buffer[9];    // Код команды 
+            CanPacket.package.data[2] = buffer[10];   // Номер парметра
+            CanPacket.package.data[3] = buffer[11];   // Тип параметра
+            CanPacket.package.data[4] = buffer[12];   // Младший байт значения индекса
+            CanPacket.package.data[5] = buffer[13];   // Старший байт значения индекса
+            CanPacket.package.data[6] = buffer[14];   // No use 
+            CanPacket.package.data[7] = buffer[15];   // No use
+            CanPacket.InProgress = false;
+            CanPacket.FunctionalCode = 0x02; 
+            CanPacket.FTCommandCode = 0x19;
+            CanPacket.faultCounterLimit = 100;
+            CanPacket.faultCounter = 0;
+            CanPacket.resetFlag = false;
+            ControllerAreaNetwork::addPacketToQueue(&CanPacket);
             return 0;
         }
         else if((buffer[6] == 0x1C) && (len > 9)) // Чтение списка параметров внешних модулей
@@ -418,22 +419,22 @@ uint32_t FT_receive_handler(uint8_t *buffer, uint32_t len)
         {
 
             packetNumber = buffer[1];
-            CanPacket->package.packageNumber = 0;
-            CanPacket->package.destinationAddress = buffer[4];
-            CanPacket->package.packageLength = 4;
-            CanPacket->package.responseTypeSign = 1;
-            CanPacket->package.sourceAddress = GeneralSettingsCAN.ID;
-            CanPacket->package.data[0] = GeneralSettingsCAN.ID;
-            CanPacket->package.data[1] = 0x02;
-            CanPacket->package.data[2] = buffer[5];
-            CanPacket->package.data[3] = buffer[6];
-            CanPacket->InProgress = false;
-            CanPacket->FunctionalCode = 0x02;
-            CanPacket->FTCommandCode = 0x11;
-            CanPacket->faultCounterLimit = 100;
-            CanPacket->faultCounter = 0;
-            CanPacket->resetFlag = false;
-            ControllerAreaNetwork::addPacketToQueue(CanPacket);
+            CanPacket.package.packageNumber = 0;
+            CanPacket.package.destinationAddress = buffer[4];
+            CanPacket.package.packageLength = 4;
+            CanPacket.package.responseTypeSign = 1;
+            CanPacket.package.sourceAddress = GeneralSettingsCAN.ID;
+            CanPacket.package.data[0] = GeneralSettingsCAN.ID;
+            CanPacket.package.data[1] = 0x02;
+            CanPacket.package.data[2] = buffer[5];
+            CanPacket.package.data[3] = buffer[6];
+            CanPacket.InProgress = false;
+            CanPacket.FunctionalCode = 0x02;
+            CanPacket.FTCommandCode = 0x11;
+            CanPacket.faultCounterLimit = 100;
+            CanPacket.faultCounter = 0;
+            CanPacket.resetFlag = false;
+            ControllerAreaNetwork::addPacketToQueue(&CanPacket);
 
             return 0;
         }
